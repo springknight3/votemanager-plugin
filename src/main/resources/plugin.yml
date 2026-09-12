@@ -3,3 +3,6 @@ version: 0.1.0-SNAPSHOT
 main: com.springknight3.votemanager.VoteManagerPlugin
 api-version: '26.2'
 description: A base plugin for managing votes.
+commands:
+	redeem:
+		description: Redeem a vote reward.
