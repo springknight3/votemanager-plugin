@@ -65,14 +65,19 @@ public final class VoteManagerPlugin extends JavaPlugin {
 			}
 
 			item.setAmount(item.getAmount() - 1);
-			sendConfiguredMessage(player, "redeemable_item_message");
+			sendConfiguredMessage(player, "redeemable_item_message", getRedeemName(item));
 			getLogger().info("[DEBUG] Redeemed item and removed one item from " + player.getName());
 			return true;
 		});
 	}
 
 	private void sendConfiguredMessage(Player player, String key) {
+		sendConfiguredMessage(player, key, "Vote Voucher");
+	}
+
+	private void sendConfiguredMessage(Player player, String key, String redeemName) {
 		String message = Objects.requireNonNullElse(getConfig().getString(key), "");
+		message = message.replace("<redeem_name>", redeemName);
 		player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
 		getLogger().info("[DEBUG] Sent " + key + " to " + player.getName());
 	}
@@ -83,13 +88,22 @@ public final class VoteManagerPlugin extends JavaPlugin {
 
 	private String getOnRedeemCommand(ItemStack item) {
 		Object onRedeemTag = getVoteNbt(item, "on_redeem");
-		if (onRedeemTag == null) {
+		return getStringNbtValue(onRedeemTag, "vote:on_redeem");
+	}
+
+	private String getRedeemName(ItemStack item) {
+		String redeemName = getStringNbtValue(getVoteNbt(item, "redeem_name"), "vote:redeem_name");
+		return redeemName == null || redeemName.isBlank() ? "Vote Voucher" : redeemName;
+	}
+
+	private String getStringNbtValue(Object nbtValue, String tagName) {
+		if (nbtValue == null) {
 			return null;
 		}
 
-		String tagText = onRedeemTag.toString();
+		String tagText = nbtValue.toString();
 		if (tagText.length() < 2 || tagText.charAt(0) != '"' || tagText.charAt(tagText.length() - 1) != '"') {
-			getLogger().warning("[DEBUG] vote:on_redeem is not a string NBT value: " + tagText);
+			getLogger().warning("[DEBUG] " + tagName + " is not a string NBT value: " + tagText);
 			return null;
 		}
 
